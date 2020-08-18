@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#515151"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/TextView_InfoText"
+        android:layout_width="183dp"
+        android:layout_height="29dp"
+        android:text="Insert Player ID"
+        app:layout_constraintBottom_toTopOf="@+id/editText_playerId"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.663" />
+
+    <Button
+        android:id="@+id/Button_playerIdAccept"
+        android:layout_width="86dp"
+        android:layout_height="42dp"
+        android:text="OK"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editText_playerId"
+        app:layout_constraintVertical_bias="0.793" />
+
+    <EditText
+        android:id="@+id/editText_playerId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="phone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.18" />
+
+    <RadioGroup
+        android:id="@+id/NationSelectRadioGroup"
+        android:layout_width="211dp"
+        android:layout_height="328dp"
+        app:layout_constraintBottom_toTopOf="@+id/Button_playerIdAccept"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editText_playerId"
+        app:layout_constraintVertical_bias="0.198">
+
+        <RadioButton
+            android:id="@+id/RB_PanAmerica"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Pan America" />
+
+        <RadioButton
+            android:id="@+id/RB_PanEurope"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pan European" />
+
+        <RadioButton
+            android:id="@+id/RB_USA"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="USA" />
+
+        <RadioButton
+            android:id="@+id/RB_USSR"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="USSR" />
+
+        <RadioButton
+            android:id="@+id/RB_Japan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Japan" />
+
+        <RadioButton
+            android:id="@+id/RB_PanAsia"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pan Asia" />
+
+        <RadioButton
+            android:id="@+id/RB_UK"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="UK" />
+
+        <RadioButton
+            android:id="@+id/RB_Italy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Italy" />
+
+        <RadioButton
+            android:id="@+id/RB_France"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="France" />
+
+        <RadioButton
+            android:id="@+id/RB_Germany"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Germany" />
+    </RadioGroup>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
