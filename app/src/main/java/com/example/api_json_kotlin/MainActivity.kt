@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
     private var stringToConvertToJson : PlayerShipJson? = null
 
     //TODO MAKE EMPTY BEFORE COMMIT
-    private val applicationID = ""
+    private val applicationID = "4466360e1477d164feb2c0ce55c2d9d7"
 
     //This is the variable that this application is all about
     var playerShipJson = ""
@@ -303,6 +303,7 @@ class MainActivity : AppCompatActivity() {
         val testArr2 = graphConstructor.listSortedByNationAndTier
         val testArrayList = ArrayList(testArr2)
         i_GraphShow.putParcelableArrayListExtra("ExtraData", testArrayList)
+        i_GraphShow.putExtra("playerID", playerId)
 
         startActivity(i_GraphShow)
     }
