@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
     private var stringToConvertToJson : PlayerShipJson? = null
 
     //TODO MAKE EMPTY BEFORE COMMIT
-    private val applicationID = "4466360e1477d164feb2c0ce55c2d9d7"
+    private val applicationID = ""
 
     //This is the variable that this application is all about
     var playerShipJson = ""

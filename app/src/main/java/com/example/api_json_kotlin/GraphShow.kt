@@ -2,18 +2,14 @@ package com.example.api_json_kotlin
 
 import android.content.Intent
 import android.graphics.Color
-import com.example.api_json_kotlin.R
 import android.os.Bundle
-import android.text.Layout
 import androidx.appcompat.app.AppCompatActivity
+import com.jjoe64.graphview.DefaultLabelFormatter
 import com.jjoe64.graphview.GraphView
 import com.jjoe64.graphview.GridLabelRenderer
 import com.jjoe64.graphview.series.DataPoint
 import com.jjoe64.graphview.series.LineGraphSeries
-import com.jjoe64.graphview.series.PointsGraphSeries
 import kotlinx.android.synthetic.main.activity_graph_show.*
-import kotlinx.android.synthetic.main.activity_main.*
-
 
 class GraphShow : AppCompatActivity() {
 
@@ -37,6 +33,10 @@ class GraphShow : AppCompatActivity() {
         startActivity(i_GraphShow)
     }
 
+    fun doATest(A:Int, B:Int ){
+        var C = A * B
+    }
+
     fun drawGraph() {
         var finalData = intent.extras?.getParcelableArrayList<PlayerShipJson>("ExtraData")
         playerId = intent.getStringExtra("playerID")
@@ -44,25 +44,33 @@ class GraphShow : AppCompatActivity() {
         var graph = findViewById<GraphView>(R.id.graph)
 
         var series = LineGraphSeries<DataPoint>()
-        var gridLabelRenderer = GridLabelRenderer(graph)
 
         if (finalData != null) {
             for (i in 0 until finalData.size){
 
                 var x = finalData[i].playerShipJsonClassData.shipTier.toDouble()
                 var y = finalData[i].playerShipJsonClassData.winRate.toDouble()
-                series.appendData(DataPoint(x,y),true, 10)
+                series.appendData(DataPoint(x, y), true, 10)
+            }
+        }
+
+        // add percentage character to vertical axis
+        graph.gridLabelRenderer.labelFormatter = object : DefaultLabelFormatter() {
+            override fun formatLabel(value: Double, isValueX: Boolean): String {
+                return if (isValueX) {
+                    super.formatLabel(value, isValueX)
+                } else {
+                    super.formatLabel(value, isValueX) + " %"
+                }
             }
         }
 
         graph.title = "Winrate"
         graph.addSeries(series)
         series.setDataPointsRadius(100F)
-        series.setColor(Color.BLUE)
+        series.setColor(Color.RED)
         series.setDrawDataPoints(true)
         series.setDataPointsRadius(10F)
         series.setThickness(5)
-
-
     }
 }
