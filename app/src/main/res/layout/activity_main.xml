@@ -12,6 +12,7 @@
         android:layout_width="183dp"
         android:layout_height="29dp"
         android:text="Insert Player ID"
+        android:textColor="#F3EDED"
         app:layout_constraintBottom_toTopOf="@+id/editText_playerId"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -36,6 +37,8 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="phone"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#DCD9D9"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
@@ -58,61 +61,71 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
-            android:text="Pan America" />
+            android:text="Pan America"
+            android:textColor="#F3EBEB" />
 
         <RadioButton
             android:id="@+id/RB_PanEurope"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Pan European" />
+            android:text="Pan European"
+            android:textColor="#F3EBEB" />
 
         <RadioButton
             android:id="@+id/RB_USA"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="USA" />
+            android:text="USA"
+            android:textColor="#F3EBEB" />
 
         <RadioButton
             android:id="@+id/RB_USSR"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="USSR" />
+            android:text="USSR"
+            android:textColor="#F3EBEB" />
 
         <RadioButton
             android:id="@+id/RB_Japan"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Japan" />
+            android:text="Japan"
+            android:textColor="#F3EBEB" />
 
         <RadioButton
             android:id="@+id/RB_PanAsia"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Pan Asia" />
+            android:text="Pan Asia"
+            android:textColor="#F3EBEB" />
 
         <RadioButton
             android:id="@+id/RB_UK"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="UK" />
+            android:text="UK"
+            android:textColor="#F3EBEB" />
 
         <RadioButton
             android:id="@+id/RB_Italy"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Italy" />
+            android:text="Italy"
+            android:textColor="#F3EBEB" />
 
         <RadioButton
             android:id="@+id/RB_France"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="France" />
+            android:text="France"
+            android:textColor="#F3EBEB" />
 
         <RadioButton
             android:id="@+id/RB_Germany"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Germany" />
+            android:text="Germany"
+            android:textColor="#F3EBEB" />
     </RadioGroup>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

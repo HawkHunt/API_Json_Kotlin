@@ -16,12 +16,12 @@ import okhttp3.*
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
+import java.lang.Exception
 import java.util.concurrent.CountDownLatch
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
-
-class MainActivity : AppCompatActivity() {
+open class MainActivity : AppCompatActivity() {
 
     private val okHttpClientVar = OkHttpClient()
     private val playerOwnedShipIdList = mutableListOf<Any>()
@@ -56,6 +56,13 @@ class MainActivity : AppCompatActivity() {
     var masterJsonObject = MasterJson()
     var jsonObject = JSONObject()
     var shipIdList = mutableListOf<Any>()
+
+
+    //TESTINGFUNCTION
+    fun mainActivityTestFunction(A: Int, B:Int): Int {
+        var result = A * B
+        return result
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -102,38 +109,32 @@ class MainActivity : AppCompatActivity() {
         //Correct length input
         if (editText_playerId.text.length == 9){
 
-            fetchShipNameJson(object : UserFeedBackInterface{
-                override fun FeedbackFunction(Msg: String, Sts: Int) {
-                     giveUserInputFeedback(Msg, Sts)
-                }
-            })
+            //TODO fix the OKHttp shit
 
-            fetchShipIDJson(object : UserFeedBackInterface{
-                override fun FeedbackFunction(Msg: String, Sts: Int) {
-                     giveUserInputFeedback(Msg, Sts)
-                }
-            })
+            fetchShipNameJson()
+
+            fetchShipIDJson()
 
             getIteratorKeysForShipsListerAsDestroyerPerNation()
             giveUserInputFeedback("Correct playerID Length" , 0)
         }
     }
 
-    private fun fetchShipNameJson(onCompleted: UserFeedBackInterface){
-
+     fun fetchShipNameJson(){
 
         for (shipCountryOfOrigin in shipCountryOfOriginList ){
 
             //CORRECT STRING
-            val shipNameUrlPerCountry = "http://api.worldofwarships.eu/wows/encyclopedia/ships/?application_id=$applicationID&type=Destroyer&fields=-description%2C-modules_tree%2C-modules%2C-default_profile%2C-upgrades%2C-images&nation=$shipCountryOfOrigin"
+            val shipNameUrlPerCountry = "https://api.worldofwarships.eu/wows/encyclopedia/ships/?application_id=$applicationID&type=Destroyer&fields=-description%2C-modules_tree%2C-modules%2C-default_profile%2C-upgrades%2C-images&nation=$shipCountryOfOrigin"
 
             val shipNamesRequest = Request.Builder().url(shipNameUrlPerCountry).build()
 
             //shipNameRequest
             okHttpClientVar.newCall(shipNamesRequest).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    onCompleted.FeedbackFunction("failed to execute ship name request, server is down or unresponsive", 1)
+                    //onCompleted.FeedbackFunction("failed to execute ship name request, server is down or unresponsive", 1)
                     countDownLatch.countDown()
+                    println("failed")
                 }
 
                 override fun onResponse(call: Call, response: Response) {
@@ -152,10 +153,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     // Goes to the API and fetches ALL ships currently owned by the player
-    private fun fetchShipIDJson(onCompleted: UserFeedBackInterface) {
+    private fun fetchShipIDJson() {
         println("Attempting to fetch Ship name JSON")
 
-        val shipIdURL = "http://api.worldofwarships.eu/wows/ships/stats/?application_id=$applicationID&in_garage=1&account_id=$playerId"
+        val shipIdURL = "https://api.worldofwarships.eu/wows/ships/stats/?application_id=$applicationID&in_garage=1&account_id=$playerId"
 
         val shipIdRequest = Request.Builder().url(shipIdURL).build()
 
@@ -163,7 +164,7 @@ class MainActivity : AppCompatActivity() {
         okHttpClientVar.newCall(shipIdRequest).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
 
-                onCompleted.FeedbackFunction("Could not fetch ship name Json, server is down or unresponsive", 1)
+                //onCompleted.FeedbackFunction("Could not fetch ship name Json, server is down or unresponsive", 1)
 
             }
 
@@ -183,13 +184,13 @@ class MainActivity : AppCompatActivity() {
 
                     //TODO( This run on UI Thread does not fire)
                     runOnUiThread {
-                        onCompleted.FeedbackFunction("Data is null or does not contain data", 1)
+                        //onCompleted.FeedbackFunction("Data is null or does not contain data", 1)
                     }
                 }
 
                 else{
                     runOnUiThread {
-                        onCompleted.FeedbackFunction("User Input accepted, playerID has data", 0)
+                        //onCompleted.FeedbackFunction("User Input accepted, playerID has data", 0)
                     }
 
                     shipsOwnedByPlayerArray = JSONObject(shipIdBody).getJSONObject("data").getJSONArray(playerId)
@@ -298,7 +299,6 @@ class MainActivity : AppCompatActivity() {
 
     suspend fun startShowGraph() {
         //attempts to start the GraphShow Activity
-
         val i_GraphShow = Intent(this, GraphShow::class.java)
         val testArr2 = graphConstructor.listSortedByNationAndTier
         val testArrayList = ArrayList(testArr2)

@@ -20,8 +20,6 @@ class GraphConstructor : AppCompatActivity() {
             var shipInQuestion = playerOwnedDestroyersJsonObject.getJSONArray("ships").getJSONObject(i).getJSONObject("playerShipJsonClassData").get("nation")
 
             if (shipInQuestion == nationName){
-                //sortedForNationArray.add(playerOwnedDestroyersJsonObject.getJSONArray("ships").getJSONObject(i))
-
                 finalArrayPerNation.add(playerOwnedDestroyersJsonObject.getJSONArray("ships").getJSONObject(i).toString())
             }
         }

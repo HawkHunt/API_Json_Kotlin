@@ -2,11 +2,13 @@ package com.example.api_json_kotlin
 
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.Paint
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.jjoe64.graphview.DefaultLabelFormatter
 import com.jjoe64.graphview.GraphView
 import com.jjoe64.graphview.GridLabelRenderer
+import com.jjoe64.graphview.series.BarGraphSeries
 import com.jjoe64.graphview.series.DataPoint
 import com.jjoe64.graphview.series.LineGraphSeries
 import kotlinx.android.synthetic.main.activity_graph_show.*
@@ -45,6 +47,9 @@ class GraphShow : AppCompatActivity() {
 
         var series = LineGraphSeries<DataPoint>()
 
+
+        var testSeries = BarGraphSeries<DataPoint>()
+
         if (finalData != null) {
             for (i in 0 until finalData.size){
 
@@ -65,12 +70,16 @@ class GraphShow : AppCompatActivity() {
             }
         }
 
+        var colorToUse = Color.WHITE
+
         graph.title = "Winrate"
+        graph.titleColor = colorToUse
+        series.color = colorToUse
+        series.isDrawDataPoints = true
+        series.dataPointsRadius = 100F
+        series.dataPointsRadius = 10F
+        series.thickness = 5
         graph.addSeries(series)
-        series.setDataPointsRadius(100F)
-        series.setColor(Color.RED)
-        series.setDrawDataPoints(true)
-        series.setDataPointsRadius(10F)
-        series.setThickness(5)
+
     }
 }
