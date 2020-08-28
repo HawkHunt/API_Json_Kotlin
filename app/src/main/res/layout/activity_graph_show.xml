@@ -7,12 +7,10 @@
     android:background="#515151"
     tools:context=".GraphShow">
 
-    <com.jjoe64.graphview.GraphView
-        android:id="@+id/graph"
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/chart"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="-224dp" />
+        android:layout_height="match_parent" />
 
     <Button
         android:id="@+id/Button_ReturnToSelect"
