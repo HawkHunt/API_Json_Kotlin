@@ -1,7 +1,5 @@
 package com.example.api_json_kotlin
 
-import android.R.attr
-import android.R.attr.data
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -44,56 +42,58 @@ class GraphShow : AppCompatActivity() {
         var finalData = intent.extras?.getParcelableArrayList<PlayerShipJson>("ExtraData")
         playerId = intent.getStringExtra("playerID")
 
-
-
+        val colors = ArrayList<Int>()
         val entries = mutableListOf<Entry>()
 
         if (finalData != null) {
             for (i in 0 until finalData.size){
-                var newEntry = Entry(finalData[i].playerShipJsonClassData.shipTier.toFloat(),finalData[i].playerShipJsonClassData.winRate.toFloat() )
-                entries.add(i, newEntry )
+                var newEntry = Entry(
+                    finalData[i].playerShipJsonClassData.shipTier.toFloat(),
+                    finalData[i].playerShipJsonClassData.winRate.toFloat()
+                )
+                entries.add(i, newEntry)
+
+                //super Unicum winrate = purple
+                if(finalData[i].playerShipJsonClassData.winRate.toFloat() in 65.1..100.0){
+                    colors.add(Color.argb(255, 225, 0, 255))
+                }
+                //unicum winrate = pink
+                else if (finalData[i].playerShipJsonClassData.winRate.toFloat() in 55.1..65.0){
+                    colors.add(Color.argb(255, 255, 0, 157))
+                }
+                //good winrate = green
+                else if (finalData[i].playerShipJsonClassData.winRate.toFloat() in 50.1..55.0){
+                    colors.add(Color.argb(255, 0, 252, 42))
+                }
+                //average winrate = yellow
+                else if (finalData[i].playerShipJsonClassData.winRate.toFloat() in 48.1..50.0){
+                    colors.add(Color.argb(255, 233, 237, 2))
+                }
+                //below average winrate = orange
+                else if (finalData[i].playerShipJsonClassData.winRate.toFloat() in 45.1..48.0){
+                    colors.add(Color.argb(255, 237, 163, 2))
+                }
+                //bad winrate = red
+                else{
+                    colors.add(Color.argb(255, 255, 0, 0))
+                }
+
             }
         }
 
-        var dataSet = LineDataSet(entries, "Winrate of ships from: ${finalData?.get(0)?.playerShipJsonClassData?.nation}")
+        var dataSet = LineDataSet(
+            entries,
+            "Winrate of ships from: ${finalData?.get(0)?.playerShipJsonClassData?.nation}"
+        )
+
         dataSet.color = Color.WHITE
+        dataSet.circleColors = colors
+        dataSet.circleRadius = 5.0F
+        dataSet.lineWidth = 3.0F
+        dataSet.valueTextSize = 12.0F
         var lineData = LineData(dataSet)
         chart.data = lineData
         chart.invalidate()
-
-        //var graph = findViewById<GraphView>(R.id.graph)
-
-        //var series = LineGraphSeries<DataPoint>()
-
-        /*if (finalData != null) {
-            for (i in 0 until finalData.size){
-                var x = finalData[i].playerShipJsonClassData.shipTier.toDouble()
-                var y = finalData[i].playerShipJsonClassData.winRate.toDouble()
-                series.appendData(DataPoint(x, y), true, 10)
-            }
-        }
-
-        add percentage character to vertical axis
-        graph.gridLabelRenderer.labelFormatter = object : DefaultLabelFormatter() {
-            override fun formatLabel(value: Double, isValueX: Boolean): String {
-                return if (isValueX) {
-                    super.formatLabel(value, isValueX)
-                } else {
-                    super.formatLabel(value, isValueX) + " %"
-                }
-            }
-        }
-
-        var colorToUse = Color.WHITE
-
-        graph.title = "Winrate"
-        graph.titleColor = colorToUse
-        series.color = colorToUse
-        series.isDrawDataPoints = true
-        series.dataPointsRadius = 100F
-        series.dataPointsRadius = 10F
-        series.thickness = 5
-        graph.addSeries(series)*/
 
     }
 }
