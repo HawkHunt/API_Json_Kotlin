@@ -79,7 +79,6 @@ open class MainActivity : AppCompatActivity() {
         var selectedRadioButton = findViewById<RadioButton>(radioGroup.checkedRadioButtonId)
         playerChosenNationToSearchName = selectedRadioButton.text.toString()
 
-
         when(playerChosenNationToSearchName){
             "Pan America" -> playerChosenNationToSearchName = "commonwealth"
             "Pan European" -> playerChosenNationToSearchName = "europe"
@@ -139,12 +138,10 @@ open class MainActivity : AppCompatActivity() {
                 override fun onResponse(call: Call, response: Response) {
                     //println("ship name request completed successfully for the ships of $shipCountryOfOrigin")
 
-                    val gson = GsonBuilder().create()
                     shipNameBody = response?.body?.string()
                     shipNameBodyArray.add(shipNameBody)
                     shipsListedAsDestroyersObjectPerNation = JSONObject(shipNameBody).getJSONObject("data")
                     shipsListedAsDestroyersObjectPerNationArray.add(shipsListedAsDestroyersObjectPerNation)
-
                     countDownLatch.countDown()
                 }
             })
@@ -174,23 +171,24 @@ open class MainActivity : AppCompatActivity() {
                 if (shipIdBody?.contains("\"$playerId\":null}")!! || shipIdBody?.contains("\"$playerId\": null}")!!) {
 
                     //TODO( This run on UI Thread does not fire)
-                    runOnUiThread { giveUserInputFeedback("Data is null or does not contain data", 1)
-                    }
+                    //runOnUiThread { giveUserInputFeedback("Data is null or does not contain data", 1)
+
+                    //}
                 }
 
                 //No player Id is specified
                 else if (shipIdBody?.contains("\"ACCOUNT_ID_NOT_SPECIFIED\",\"code\":402,\"value\":\"\"")!!) {
 
                     //TODO( This run on UI Thread does not fire)
-                    runOnUiThread {
+                    //runOnUiThread {
                         //onCompleted.FeedbackFunction("Data is null or does not contain data", 1)
-                    }
+                    //}
                 }
 
                 else{
-                    runOnUiThread {
+                    //runOnUiThread {
                         //onCompleted.FeedbackFunction("User Input accepted, playerID has data", 0)
-                    }
+                    //}
 
                     shipsOwnedByPlayerArray = JSONObject(shipIdBody).getJSONObject("data").getJSONArray(playerId)
 
@@ -239,7 +237,7 @@ open class MainActivity : AppCompatActivity() {
                 val shipNameJSONObject = shipsListedAsDestroyersObjectPerNationArray.get(i).getJSONObject(iteratorKeyAsUnknownShipIdFromNationSpecificShipList).get("name")
                 shipNameHashMap[iteratorKeyAsUnknownShipIdFromNationSpecificShipList] = shipNameJSONObject
 
-                //add the shipnames to the specific hashmap
+                //add the nation to the specific hashmap
                 val shipNationJSONObject = shipsListedAsDestroyersObjectPerNationArray.get(i).getJSONObject(iteratorKeyAsUnknownShipIdFromNationSpecificShipList).get("nation")
                 shipNationHashMap[iteratorKeyAsUnknownShipIdFromNationSpecificShipList] = shipNationJSONObject
 
