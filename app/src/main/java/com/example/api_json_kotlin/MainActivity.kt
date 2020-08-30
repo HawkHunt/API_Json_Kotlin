@@ -16,7 +16,6 @@ import okhttp3.*
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
-import java.lang.Exception
 import java.util.concurrent.CountDownLatch
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
@@ -50,7 +49,6 @@ open class MainActivity : AppCompatActivity() {
     //TODO MAKE EMPTY BEFORE COMMIT
     private val applicationID = ""
 
-    //This is the variable that this application is all about
     var playerShipJson = ""
     val graphConstructor = GraphConstructor()
     var masterJsonObject = MasterJson()
@@ -58,24 +56,28 @@ open class MainActivity : AppCompatActivity() {
     var shipIdList = mutableListOf<Any>()
 
 
-    //TESTINGFUNCTION
+    // a testing function to make sure the activity is operating
     fun mainActivityTestFunction(A: Int, B:Int): Int {
         var result = A * B
         return result
     }
 
+    //default on create
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        //disable the main functionality by commenting these three lines
+       //Button listener
         Button_playerIdAccept.setOnClickListener(){
             handleInitialNationToSearchForByUser()
         }
     }
 
+    //
     private fun handleInitialNationToSearchForByUser() {
+        // a group of radio buttons in the UI
         var radioGroup = NationSelectRadioGroup
+        // find the selected radio button from the UI
         var selectedRadioButton = findViewById<RadioButton>(radioGroup.checkedRadioButtonId)
         playerChosenNationToSearchName = selectedRadioButton.text.toString()
 
@@ -95,53 +97,63 @@ open class MainActivity : AppCompatActivity() {
         handleInitialPlayedIdInputByUser()
     }
 
+    //handle the UI input for the input field asking the user for his player ID
     fun handleInitialPlayedIdInputByUser(){
 
         //playerInput from a text field in the UI
         playerId = editText_playerId.text.toString()
 
+        //check for input length
         if (editText_playerId.text.length < 9){
+            // userfeedback function in the UI
             giveUserInputFeedback("Incorrect playerID Length", 1)
         }
 
         //Correct length input
         if (editText_playerId.text.length == 9){
 
-            //TODO fix the OKHttp shit
-
             fetchShipNameJson()
 
             fetchShipIDJson()
 
             getIteratorKeysForShipsListerAsDestroyerPerNation()
+
+            // userfeedback function in the UI
             giveUserInputFeedback("Correct playerID Length" , 0)
         }
     }
 
+    //Construct a REST call and call the WG server to get a JSON that contains all destroyers for a given nation
      fun fetchShipNameJson(){
 
+        //there are 10 listed nations in the game to loop through
         for (shipCountryOfOrigin in shipCountryOfOriginList ){
 
-            //CORRECT STRING
+            //the constructed URL to call per loop iteration
             val shipNameUrlPerCountry = "https://api.worldofwarships.eu/wows/encyclopedia/ships/?application_id=$applicationID&type=Destroyer&fields=-description%2C-modules_tree%2C-modules%2C-default_profile%2C-upgrades%2C-images&nation=$shipCountryOfOrigin"
 
+            // the request builder
             val shipNamesRequest = Request.Builder().url(shipNameUrlPerCountry).build()
 
-            //shipNameRequest
+            //a new call to be made
             okHttpClientVar.newCall(shipNamesRequest).enqueue(object : Callback {
+                //when the call fails
                 override fun onFailure(call: Call, e: IOException) {
                     //onCompleted.FeedbackFunction("failed to execute ship name request, server is down or unresponsive", 1)
                     countDownLatch.countDown()
                     println("failed")
                 }
-
+                //when the call fails
                 override fun onResponse(call: Call, response: Response) {
-                    //println("ship name request completed successfully for the ships of $shipCountryOfOrigin")
-
+                    // returned response
                     shipNameBody = response?.body?.string()
                     shipNameBodyArray.add(shipNameBody)
+                    //create a json object using the response
                     shipsListedAsDestroyersObjectPerNation = JSONObject(shipNameBody).getJSONObject("data")
+                    //a list of JSONObjects of ships
                     shipsListedAsDestroyersObjectPerNationArray.add(shipsListedAsDestroyersObjectPerNation)
+
+                    //TODO Replace with Callbacks
                     countDownLatch.countDown()
                 }
             })
@@ -152,16 +164,17 @@ open class MainActivity : AppCompatActivity() {
     private fun fetchShipIDJson() {
         println("Attempting to fetch Ship name JSON")
 
+        //a constructed URL
         val shipIdURL = "https://api.worldofwarships.eu/wows/ships/stats/?application_id=$applicationID&in_garage=1&account_id=$playerId"
 
+        //another request
         val shipIdRequest = Request.Builder().url(shipIdURL).build()
 
         //Ship ID call
         okHttpClientVar.newCall(shipIdRequest).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-
+                //TODO implement userfeedbackfunction
                 //onCompleted.FeedbackFunction("Could not fetch ship name Json, server is down or unresponsive", 1)
-
             }
 
             override fun onResponse(call: Call, response: Response) {
@@ -171,24 +184,15 @@ open class MainActivity : AppCompatActivity() {
                 if (shipIdBody?.contains("\"$playerId\":null}")!! || shipIdBody?.contains("\"$playerId\": null}")!!) {
 
                     //TODO( This run on UI Thread does not fire)
-                    //runOnUiThread { giveUserInputFeedback("Data is null or does not contain data", 1)
-
-                    //}
                 }
 
                 //No player Id is specified
                 else if (shipIdBody?.contains("\"ACCOUNT_ID_NOT_SPECIFIED\",\"code\":402,\"value\":\"\"")!!) {
 
                     //TODO( This run on UI Thread does not fire)
-                    //runOnUiThread {
-                        //onCompleted.FeedbackFunction("Data is null or does not contain data", 1)
-                    //}
                 }
 
                 else{
-                    //runOnUiThread {
-                        //onCompleted.FeedbackFunction("User Input accepted, playerID has data", 0)
-                    //}
 
                     shipsOwnedByPlayerArray = JSONObject(shipIdBody).getJSONObject("data").getJSONArray(playerId)
 
@@ -224,6 +228,7 @@ open class MainActivity : AppCompatActivity() {
 
     }
 
+    // get the all the needed parts from all the JSONObjects and put them in their respective hashmaps
     private fun getIteratorKeysForShipsListerAsDestroyerPerNation() {
         countDownLatch.await()
 
@@ -237,21 +242,23 @@ open class MainActivity : AppCompatActivity() {
                 val shipNameJSONObject = shipsListedAsDestroyersObjectPerNationArray.get(i).getJSONObject(iteratorKeyAsUnknownShipIdFromNationSpecificShipList).get("name")
                 shipNameHashMap[iteratorKeyAsUnknownShipIdFromNationSpecificShipList] = shipNameJSONObject
 
-                //add the nation to the specific hashmap
+                //Add the nation to the specific hashmap
                 val shipNationJSONObject = shipsListedAsDestroyersObjectPerNationArray.get(i).getJSONObject(iteratorKeyAsUnknownShipIdFromNationSpecificShipList).get("nation")
                 shipNationHashMap[iteratorKeyAsUnknownShipIdFromNationSpecificShipList] = shipNationJSONObject
 
+                //Add the tier to the specific hashmap
                 val shipTierJSONObject = shipsListedAsDestroyersObjectPerNationArray.get(i).getJSONObject(iteratorKeyAsUnknownShipIdFromNationSpecificShipList).get("tier")
                 shipTierHashMap[iteratorKeyAsUnknownShipIdFromNationSpecificShipList] = shipTierJSONObject.toString()
 
                 listOfKeys.add(iteratorKeyAsUnknownShipIdFromNationSpecificShipList)
             }
         }
-        filterShipsbyTypeDestroyerFromPlayerOwnedShipIdList()
+        filterShipsByTypeDestroyerFromPlayerOwnedShipIdList()
     }
 
-
-    fun filterShipsbyTypeDestroyerFromPlayerOwnedShipIdList() {
+    // All the JSONObjects from the previous function still contain ALL types of ships: Battleships, carriers, cruisers and destroyers.
+    // This function filters out the destroyers from that data and puts them in a new list
+    fun filterShipsByTypeDestroyerFromPlayerOwnedShipIdList() {
 
         val completedListOfShipsToConvertBackToJson = mutableListOf<PlayerShipJson>()
 
@@ -263,6 +270,7 @@ open class MainActivity : AppCompatActivity() {
             }
         }
 
+        //filter the shipNameBodyArray using the filteredShipsOwnedForTypeDestroyer keys from the logic above
         for (shipId in 0 until shipNameBodyArray.size){
             for (filteredDestroyer in 0 until filteredShipsOwnedForTypeDestroyer.size){
                 if (shipNameBodyArray[shipId]?.contains(filteredShipsOwnedForTypeDestroyer[filteredDestroyer].toString())!!){
@@ -278,6 +286,7 @@ open class MainActivity : AppCompatActivity() {
             }
         }
 
+        //Gson Library functionality to convert back to JSON
         masterJsonObject = MasterJson(completedListOfShipsToConvertBackToJson)
         val gsonPretty = GsonBuilder().setPrettyPrinting().create()
         playerShipJson = gsonPretty.toJson(masterJsonObject)
@@ -286,6 +295,7 @@ open class MainActivity : AppCompatActivity() {
         Coroutinelauncher()
     }
 
+    //Multithreading part using coroutines to offload some calculations to another thread
     fun Coroutinelauncher(){
         GlobalScope.launch {
             val deferred =  async { graphConstructor.SortForNation(masterJsonObject, jsonObject, shipCountryOfOriginList.toList(), playerChosenNationToSearchName, shipsListedAsDestroyersObjectPerNationArray) }
@@ -294,6 +304,7 @@ open class MainActivity : AppCompatActivity() {
         }
     }
 
+    //starting the next activity. called only once the needed calculations are complete
     suspend fun startShowGraph() {
         //attempts to start the GraphShow Activity
         val i_GraphShow = Intent(this, GraphShow::class.java)
@@ -305,6 +316,7 @@ open class MainActivity : AppCompatActivity() {
         startActivity(i_GraphShow)
     }
 
+    //a function to provide the user with feedback using a UI Textfield
     private fun giveUserInputFeedback(feedbackMessage : String, status: Int){
 
             //status 0: No Error
@@ -321,12 +333,14 @@ open class MainActivity : AppCompatActivity() {
 
     }
 
+    //an interface to be implemented
     interface UserFeedBackInterface{
         fun FeedbackFunction(Msg: String, Sts: Int)
     }
 
 }
 
+//Dataclasses to be used in the conversion
 data class MasterJson(val ships: MutableList<PlayerShipJson> = ArrayList())
 
 @Parcelize
