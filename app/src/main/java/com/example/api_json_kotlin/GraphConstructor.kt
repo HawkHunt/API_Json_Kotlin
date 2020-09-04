@@ -27,8 +27,8 @@ class GraphConstructor : AppCompatActivity() {
         for (i in 0 until finalArrayPerNation.size){
 
             //convert back to object for sorting
-            val testingObject = Gson().fromJson<PlayerShipJson>(finalArrayPerNation[i], PlayerShipJson::class.java)
-            listSortedByNationAndTier.add(testingObject)
+            val objectToConvert = Gson().fromJson<PlayerShipJson>(finalArrayPerNation[i], PlayerShipJson::class.java)
+            listSortedByNationAndTier.add(objectToConvert)
         }
 
         //sort by shipTier

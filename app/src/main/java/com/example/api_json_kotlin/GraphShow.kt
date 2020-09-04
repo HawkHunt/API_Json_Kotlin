@@ -1,5 +1,6 @@
 package com.example.api_json_kotlin
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -41,18 +42,31 @@ class GraphShow : AppCompatActivity() {
         startActivity(i_GraphShow)
     }
 
+    @SuppressLint("SetTextI18n")
+    fun calculateTotalWinrate(list: ArrayList<PlayerShipJson>): Float {
+        var winPercentage  = 0.0F
+        var totalWinPercentage = 0.0F
+        for (i in 0 until list.size){
+            winPercentage += list[i].playerShipJsonClassData.winRate.toFloat()
+        }
+
+        totalWinPercentage = winPercentage/list.size
+
+        return totalWinPercentage
+    }
+
     //the function to actually fill the data and then draw the graph
     fun fillEntryListAndDrawGraph() {
 
         var finalData = intent.extras?.getParcelableArrayList<PlayerShipJson>("ExtraData")
         //playerId = intent.getStringExtra("playerID")
 
-
         val colors = ArrayList<Int>()
         val entries = mutableListOf<Entry>()
 
         //if the data is not null the for loop may execute
         if (finalData != null) {
+
             for (i in 0 until finalData.size){
                 //declare a new Entry object
                 var newEntry = Entry(
@@ -87,15 +101,20 @@ class GraphShow : AppCompatActivity() {
                 else{
                     colors.add(Color.argb(255, 255, 0, 0))
                 }
-
             }
         }
-
 
         var dataSet = LineDataSet(
             entries,
             "Winrate of ships from: ${finalData?.get(0)?.playerShipJsonClassData?.nation}"
         )
+
+        //calculate the total win Percentage
+        Text_WinRateText.text = "${finalData?.let { calculateTotalWinrate(it) }} %"
+
+        //TODO SET Text_WinRateText to a dynamic color depending on its value
+
+        Text_FixedWinRateText.setTextColor(Color.WHITE)
 
         dataSet.color = Color.WHITE
         dataSet.lineWidth = 3.0F
