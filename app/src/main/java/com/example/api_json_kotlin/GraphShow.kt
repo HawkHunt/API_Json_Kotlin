@@ -8,12 +8,22 @@ import androidx.appcompat.app.AppCompatActivity
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.highlight.Highlight
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import kotlinx.android.synthetic.main.activity_graph_show.*
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 
-class GraphShow : AppCompatActivity() {
+class GraphShow : AppCompatActivity(), OnChartValueSelectedListener,
+    com.github.mikephil.charting.listener.OnChartValueSelectedListener {
 
     var playerId = ""
+    var finalData2 = ArrayList<PlayerShipJson>()
+    val techLineOneEntries = mutableListOf<Entry>()
+    val alternateTechLineEntries = mutableListOf<Entry>()
+    val premiumEntries = mutableListOf<Entry>()
+
 
     // a testing function to make sure the activity is operating
     fun doATest(A: Int, B: Int){
@@ -42,8 +52,15 @@ class GraphShow : AppCompatActivity() {
         startActivity(i_GraphShow)
     }
 
-    @SuppressLint("SetTextI18n")
-    fun calculateTotalWinrate(list: ArrayList<PlayerShipJson>): Float {
+    private fun calculateTotalWinrate(list: ArrayList<PlayerShipJson>): BigDecimal? {
+
+        //TODO Round the winrate numbers This should be done in a nicer way
+        for (i in 0 until finalData2.size){
+            var unroundedWinrate = finalData2[i].playerShipJsonClassData.winRate
+            val decimal = RoundTheNumber(unroundedWinrate.toFloat(), 5)
+            finalData2[i].playerShipJsonClassData.winRate = decimal.toString()
+        }
+
         var winPercentage  = 0.0F
         var totalWinPercentage = 0.0F
         for (i in 0 until list.size){
@@ -51,23 +68,52 @@ class GraphShow : AppCompatActivity() {
         }
 
         totalWinPercentage = winPercentage/list.size
+        return RoundTheNumber(totalWinPercentage, 2)
+    }
 
-        return totalWinPercentage
+    fun RoundTheNumber(unRoundedNumber: Float, decimalPlaces: Int): BigDecimal? {
+        var roundedNumber = BigDecimal(unRoundedNumber.toDouble()).setScale(
+            decimalPlaces,
+            RoundingMode.HALF_EVEN
+        )
+        return roundedNumber
     }
 
     //the function to actually fill the data and then draw the graph
+    @SuppressLint("SetTextI18n")
     fun fillEntryListAndDrawGraph() {
 
-        var finalData = intent.extras?.getParcelableArrayList<PlayerShipJson>("ExtraData")
-        //playerId = intent.getStringExtra("playerID")
+        //Test cases: Alex heeft friesland, Okhotnik
+        //test cases: Joost heeft Vampire en Sirico
+        //test cases: Luuk Heeft een aantal premiums
 
+        //http://api.worldofwarships.eu/wows/encyclopedia/ships/?application_id=4466360e1477d164feb2c0ce55c2d9d7&type=Destroyer&fields=-description%2C-modules_tree%2C-modules%2C-default_profile%2C-upgrades%2C-images&nation=
+        //TODO TEMPORARY-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        val listOfCommonwealthPremiums = arrayListOf("Haida", "Vampire")
+        val listOfEuropeanPremiums = arrayListOf("Friesland", "Småland", "Błyskawica", "Orkan", "Lappland")
+        val listOfFrancePremiums = arrayListOf("Siroco", "Aigle", "Le Terrible", "Marceau")
+        val listOfGermanyPremiums = arrayListOf("Z-44", "Z-35", "T-61", "Z-39")
+        val listOfItalyPremiums = arrayListOf("Paolo Emilio",  "Leone")
+        val listOfJapanPremiums = arrayListOf("Kamikaze R", "Kamikaze", "Yūdachi", "Tachibana Lima", "Asashio", "HSF Harekaze", "Fūjin", "Tachibana", "Asashio B", "AL Yukikaze", "Shinonome", "Arashi", "Hayate")
+        val listOfPanAsiaPremiums = arrayListOf("Anshan", "Siliwangi", "Loyang")
+        val listOfUsaPremiums = arrayListOf("Monaghan", "Black", "Sims", "Kidd", "Benham", "Smith", "Sims B", "Hill", "Somers")
+        val listOfUkPremiums = arrayListOf("Campbeltown", "Gallant", "Cossack")
+        val listOfUssrPremiums = arrayListOf("Gremyashchy", "Neustrashimy", "Okhotnik", "Leningrad", "DD R-10")
+
+        val listOfJapanAlternateLineShips = arrayListOf("Minekaze", "Hatsuharu", "Shiratsuyu", "Akizuki", "Kitakaze", "Harugumo")
+        val listOfUssrAlternateLineShips = arrayListOf( "Ognevoi", "Udaloi", "Grozovoi" )
+
+
+        //playerId = intent.getStringExtra("playerID")
+        val finalData = intent.extras?.getParcelableArrayList<PlayerShipJson>("ExtraData")
+        finalData2 = intent.extras?.getParcelableArrayList<PlayerShipJson>("ExtraData") as ArrayList<PlayerShipJson>
         val colors = ArrayList<Int>()
-        val entries = mutableListOf<Entry>()
 
         //if the data is not null the for loop may execute
         if (finalData != null) {
 
             for (i in 0 until finalData.size){
+
                 //declare a new Entry object
                 var newEntry = Entry(
                     //set the X coordinate of the entry point to be the ship tier from the finalData list
@@ -75,26 +121,68 @@ class GraphShow : AppCompatActivity() {
                     //set the Y coordinate of the entry point to be the win rate from the finalData list
                     finalData[i].playerShipJsonClassData.winRate.toFloat()
                 )
-                entries.add(i, newEntry)
+
+                //TODO this is where the data is checked for premiums, specials and alternate lines. It is distributed accordingly
+                //TODO there are 4 options
+                //TODO Option 1 there are only techline ships
+                //TODO Option 2 there are techline ships AND alternate line ships
+                //TODO Option 3 There are techline ships and premium ships
+                //TODO Option 4 there are techline ships, alternateline ships and premiums
+
+                var listOfPremiumsToCheckAgainst = arrayListOf("")
+                when(finalData[0].playerShipJsonClassData.nation){
+                    "commonwealth" -> listOfPremiumsToCheckAgainst = listOfCommonwealthPremiums
+                    "europe" -> listOfPremiumsToCheckAgainst = listOfEuropeanPremiums
+                    "france" -> listOfPremiumsToCheckAgainst = listOfFrancePremiums
+                    "germany" -> listOfPremiumsToCheckAgainst = listOfGermanyPremiums
+                    "italy" -> listOfPremiumsToCheckAgainst = listOfItalyPremiums
+                    "japan" -> listOfPremiumsToCheckAgainst = listOfJapanPremiums
+                    "pan_asia" -> listOfPremiumsToCheckAgainst = listOfPanAsiaPremiums
+                    "usa" -> listOfPremiumsToCheckAgainst = listOfUsaPremiums
+                    "uk" -> listOfPremiumsToCheckAgainst = listOfUkPremiums
+                    "ussr" -> listOfPremiumsToCheckAgainst = listOfUssrPremiums
+                }
+
+                var premiumCounter = 0
+                // if the ship is premium then add this ship to that entrylist
+                if (listOfPremiumsToCheckAgainst.contains(finalData[i].shipName)){
+                    premiumEntries.add(premiumCounter, newEntry)
+                    //println("${finalData[i].shipName} is a premium")
+                    premiumCounter += 1
+                }
+                var alternateTechLineCounter = 0
+
+                //if the ship is russian alternate or japan alternate
+                if(finalData[0].playerShipJsonClassData.nation == "japan" && listOfJapanAlternateLineShips.contains(finalData[i].shipName) || finalData[0].playerShipJsonClassData.nation == "ussr" && listOfUssrAlternateLineShips.contains(finalData[i].shipName)){
+                    alternateTechLineEntries.add(alternateTechLineCounter, newEntry)
+                    alternateTechLineCounter += 1
+                }
+
+                //if not then its technline and can be added as normal
+                else
+                {
+                    techLineOneEntries.add(i, newEntry)
+                    //println("${finalData[i].shipName} is NOT a premium")
+                }
 
                 //super Unicum winrate = purple
-                if(finalData[i].playerShipJsonClassData.winRate.toFloat() in 65.1..100.0){
+                if(finalData2[i].playerShipJsonClassData.winRate.toFloat() in 65.1..100.0){
                     colors.add(Color.argb(255, 225, 0, 255))
                 }
                 //unicum winrate = pink
-                else if (finalData[i].playerShipJsonClassData.winRate.toFloat() in 55.1..65.0){
+                else if (finalData2[i].playerShipJsonClassData.winRate.toFloat() in 55.1..65.0){
                     colors.add(Color.argb(255, 255, 0, 157))
                 }
                 //good winrate = green
-                else if (finalData[i].playerShipJsonClassData.winRate.toFloat() in 50.1..55.0){
+                else if (finalData2[i].playerShipJsonClassData.winRate.toFloat() in 50.1..55.0){
                     colors.add(Color.argb(255, 0, 252, 42))
                 }
                 //average winrate = yellow
-                else if (finalData[i].playerShipJsonClassData.winRate.toFloat() in 48.1..50.0){
+                else if (finalData2[i].playerShipJsonClassData.winRate.toFloat() in 48.1..50.0){
                     colors.add(Color.argb(255, 233, 237, 2))
                 }
                 //below average winrate = orange
-                else if (finalData[i].playerShipJsonClassData.winRate.toFloat() in 45.1..48.0){
+                else if (finalData2[i].playerShipJsonClassData.winRate.toFloat() in 45.1..48.0){
                     colors.add(Color.argb(255, 237, 163, 2))
                 }
                 //bad winrate = red
@@ -104,28 +192,185 @@ class GraphShow : AppCompatActivity() {
             }
         }
 
-        var dataSet = LineDataSet(
-            entries,
+        //calculate the total win Percentage
+        var testWinrate : BigDecimal  = finalData?.let { calculateTotalWinrate(it) }!!
+        Text_WinRateText.text = "${testWinrate} %"
+
+        TemporaryTextColorSettingFunction(testWinrate)
+        Text_FixedWinRateText.setTextColor(Color.WHITE)
+
+        //Turn a bunch of entries called PremiumTechLineEntries into a LineDataSet1
+        // These are the premiums
+        var premiumDataSet = LineDataSet(
+            premiumEntries, "Winrate of premium ships from: ${
+                finalData?.get(
+                    0
+                )?.playerShipJsonClassData?.nation
+            }"
+        )
+
+        //ineDataSet1 parameters
+        premiumDataSet.color = Color.YELLOW
+        premiumDataSet.lineWidth = 3.0F
+        premiumDataSet.setCircleColor(Color.YELLOW)
+        premiumDataSet.circleHoleColor =Color.YELLOW
+        premiumDataSet.circleHoleRadius = 3.0F
+        premiumDataSet.circleRadius = 5.0F
+        premiumDataSet.valueTextSize = 12.0F
+
+        //Turn a bunch of entries called techLineOneEntries into a LineDataSet2
+        var techLineDataSet = LineDataSet(
+            techLineOneEntries,
             "Winrate of ships from: ${finalData?.get(0)?.playerShipJsonClassData?.nation}"
         )
 
-        //calculate the total win Percentage
-        Text_WinRateText.text = "${finalData?.let { calculateTotalWinrate(it) }} %"
+        //ineDataSet2 parameters
+        techLineDataSet.color = Color.WHITE
+        techLineDataSet.lineWidth = 3.0F
+        techLineDataSet.circleHoleRadius = 3.0F
+        techLineDataSet.circleColors = colors
+        techLineDataSet.circleRadius = 5.0F
+        techLineDataSet.valueTextSize = 12.0F
 
-        //TODO SET Text_WinRateText to a dynamic color depending on its value
+        //highlighter
+        techLineDataSet.isHighlightEnabled = true
+        techLineDataSet.highLightColor = Color.RED
+        techLineDataSet.highlightLineWidth = 2.0F
 
-        Text_FixedWinRateText.setTextColor(Color.WHITE)
+        var alternateTechLineDataSet = LineDataSet(
+            alternateTechLineEntries,
+            "Winrate of ships from: ${finalData?.get(0)?.playerShipJsonClassData?.nation}"
+        )
 
-        dataSet.color = Color.WHITE
-        dataSet.lineWidth = 3.0F
-        dataSet.circleColors = colors
-        dataSet.circleRadius = 5.0F
-        dataSet.valueTextSize = 12.0F
-        var lineData = LineData(dataSet)
-        dataSet.isHighlightEnabled = true
-        dataSet.highLightColor = Color.RED
-        dataSet.highlightLineWidth = 2.0F
-        chart.data = lineData
+        val listWithTechLineAndPremium = mutableListOf<LineDataSet>()
+        listWithTechLineAndPremium.add(techLineDataSet)
+        listWithTechLineAndPremium.add(premiumDataSet)
+
+        val listWithTechLineAndAlternate = mutableListOf<LineDataSet>()
+        listWithTechLineAndAlternate.add(techLineDataSet)
+        listWithTechLineAndAlternate.add(alternateTechLineDataSet)
+
+        val listWithTechlineAndAlternateAndPremium = mutableListOf<LineDataSet>()
+        listWithTechlineAndAlternateAndPremium.add(techLineDataSet)
+        listWithTechlineAndAlternateAndPremium.add(alternateTechLineDataSet)
+        listWithTechlineAndAlternateAndPremium.add(premiumDataSet)
+
+
+
+        //TODO Testcase European ships : 565421233
+        //premiums and techline
+        if (techLineOneEntries.size > 0  && alternateTechLineEntries.size == 0 && premiumEntries.size > 0){
+            val data = LineData(listWithTechLineAndPremium as List<ILineDataSet>?)
+            chart.data = data
+            println("there's premiums")
+        }
+            //TODO testcase Japanese ships :557331936
+        // techline and alternate
+        else if ( techLineOneEntries.size > 0 && alternateTechLineEntries.size > 0 && premiumEntries.size == 0){
+            val data = LineData(listWithTechLineAndAlternate as List<ILineDataSet>?)
+            chart.data = data
+            println("there's alternate lines")
+        }
+
+            //TODO testcase Italian ships : 550614274
+        // OnlyPremiums
+        else if ( techLineOneEntries.size == 0 && alternateTechLineEntries.size == 0 && premiumEntries.size > 0){
+            val data = LineData(premiumDataSet)
+            chart.data = data
+            println("theres only techtree and alternate lines")
+        }
+
+            //TODO testcase Japanese ships : 526280093 and : 505295462
+        //premiums, techline and alternate
+        else if (premiumEntries.size > 0 && alternateTechLineEntries.size > 0 && techLineOneEntries.size > 0){
+            val data = LineData(listWithTechlineAndAlternateAndPremium as List<ILineDataSet>?)
+            chart.data = data
+            println("theres premiums, techline AND alternate techlines")
+        }
+
+            //Todo testcase  USA ship : 565421233
+
+            //Todo TESTCASE PASSES
+        //only techline
+        else{
+            val lineDataSet = LineData(techLineDataSet)
+            chart.data = lineDataSet
+            println("theres only techline ships")
+        }
+
+        chart.setOnChartValueSelectedListener(this)
+
         chart.invalidate() // Updates the chart
+
+    }
+
+    //TODO implement a better solution this is practically double code
+    fun TemporaryTextColorSettingFunction(winrate: BigDecimal?){
+
+        if(winrate!!.toDouble() in 65.1..100.0){
+            Text_WinRateText.setTextColor(Color.argb(255, 225, 0, 255))
+        }
+        //unicum winrate = pink
+        else if (winrate!!.toDouble() in 55.1..65.0){
+            Text_WinRateText.setTextColor(Color.argb(255, 255, 0, 157))
+        }
+        //good winrate = green
+        else if (winrate!!.toDouble() in 50.1..55.0){
+            Text_WinRateText.setTextColor(Color.argb(255, 0, 252, 42))
+        }
+        //average winrate = yellow
+        else if (winrate!!.toDouble() in 48.1..50.0){
+            Text_WinRateText.setTextColor(Color.argb(255, 233, 237, 2))
+        }
+        //below average winrate = orange
+        else if (winrate!!.toDouble() in 45.1..48.0){
+            Text_WinRateText.setTextColor(Color.argb(255, 237, 163, 2))
+        }
+        //bad winrate = red
+        else{
+            Text_WinRateText.setTextColor(Color.argb(255, 255, 0, 0))
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    override fun onValueSelected(e: Entry?, h: Highlight?) {
+        if (e != null) {
+
+            // TODO do not search for the e.x because the index of x is problematic due to the size of the array I think
+            // TODO  Entry.x = ${e.x} is correct
+
+            val particularWinrate = e.y
+            val decimal = RoundTheNumber(particularWinrate, 5)
+            var tempThing = finalData2.find { decimal.toString() == it.playerShipJsonClassData.winRate }
+
+            if (tempThing != null) {
+                Text_currentlyHighlightedShip.text = tempThing.shipName
+            }
+            else{
+                Text_currentlyHighlightedShip.text = "Null"
+                println("isNull")
+            }
+        }
+    }
+
+    override fun onNothingSelected() {
+        Text_currentlyHighlightedShip.text = ""
     }
 }
+
+interface OnChartValueSelectedListener {
+    /**
+     * Called when a value has been selected inside the chart.
+     *
+     * @param e The selected Entry.
+     * @param h The corresponding highlight object that contains information
+     * about the highlighted position
+     */
+    fun onValueSelected(e: Entry?, h: Highlight?)
+
+    /**
+     * Called when nothing has been selected or an "un-select" has been made.
+     */
+    fun onNothingSelected()
+}
+

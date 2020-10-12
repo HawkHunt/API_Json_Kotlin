@@ -225,7 +225,6 @@ open class MainActivity : AppCompatActivity() {
                 }
             }
         })
-
     }
 
     // get the all the needed parts from all the JSONObjects and put them in their respective hashmaps
@@ -327,7 +326,6 @@ open class MainActivity : AppCompatActivity() {
             else{
                 TextView_InfoText.setTextColor(Color.RED)
             }
-
             TextView_InfoText.text = feedbackMessage
             editText_playerId.text.clear()
 
@@ -347,4 +345,4 @@ data class MasterJson(val ships: MutableList<PlayerShipJson> = ArrayList())
 data class PlayerShipJson(val shipName: String = "default", val playerShipJsonClassData: DetailedShipStatistics) : Parcelable
 
 @Parcelize
-data class DetailedShipStatistics(val shipIdNumber: String = "123456", val nation: String = "default nation", val shipTier: String , val winRate: String) : Parcelable
+data class DetailedShipStatistics(val shipIdNumber: String = "123456", val nation: String = "default nation", val shipTier: String, var winRate: String) : Parcelable

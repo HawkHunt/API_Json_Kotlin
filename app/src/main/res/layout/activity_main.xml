@@ -37,6 +37,7 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="phone"
+        android:text="565421233"
         android:textColor="#FFFFFF"
         android:textColorHint="#DCD9D9"
         app:layout_constraintBottom_toBottomOf="parent"
