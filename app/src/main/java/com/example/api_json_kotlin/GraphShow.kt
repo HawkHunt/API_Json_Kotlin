@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.github.mikephil.charting.data.DataSet
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
@@ -20,10 +21,10 @@ class GraphShow : AppCompatActivity(), OnChartValueSelectedListener,
 
     var playerId = ""
     var finalData2 = ArrayList<PlayerShipJson>()
-    val techLineOneEntries = mutableListOf<Entry>()
-    val alternateTechLineEntries = mutableListOf<Entry>()
-    val premiumEntries = mutableListOf<Entry>()
 
+    var techLineEntryList = mutableListOf<Entry>()
+    var alternateTechLineEntryList = mutableListOf<Entry>()
+    var premiumEntryList = mutableListOf<Entry>()
 
     // a testing function to make sure the activity is operating
     fun doATest(A: Int, B: Int){
@@ -83,10 +84,6 @@ class GraphShow : AppCompatActivity(), OnChartValueSelectedListener,
     @SuppressLint("SetTextI18n")
     fun fillEntryListAndDrawGraph() {
 
-        //Test cases: Alex heeft friesland, Okhotnik
-        //test cases: Joost heeft Vampire en Sirico
-        //test cases: Luuk Heeft een aantal premiums
-
         //http://api.worldofwarships.eu/wows/encyclopedia/ships/?application_id=4466360e1477d164feb2c0ce55c2d9d7&type=Destroyer&fields=-description%2C-modules_tree%2C-modules%2C-default_profile%2C-upgrades%2C-images&nation=
         //TODO TEMPORARY-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
         val listOfCommonwealthPremiums = arrayListOf("Haida", "Vampire")
@@ -112,6 +109,10 @@ class GraphShow : AppCompatActivity(), OnChartValueSelectedListener,
         //if the data is not null the for loop may execute
         if (finalData != null) {
 
+            var regularTechLineCounter = 0
+            var premiumCounter = 0
+            var alternateTechLineCounter = 0
+
             for (i in 0 until finalData.size){
 
                 //declare a new Entry object
@@ -130,6 +131,7 @@ class GraphShow : AppCompatActivity(), OnChartValueSelectedListener,
                 //TODO Option 4 there are techline ships, alternateline ships and premiums
 
                 var listOfPremiumsToCheckAgainst = arrayListOf("")
+
                 when(finalData[0].playerShipJsonClassData.nation){
                     "commonwealth" -> listOfPremiumsToCheckAgainst = listOfCommonwealthPremiums
                     "europe" -> listOfPremiumsToCheckAgainst = listOfEuropeanPremiums
@@ -143,27 +145,23 @@ class GraphShow : AppCompatActivity(), OnChartValueSelectedListener,
                     "ussr" -> listOfPremiumsToCheckAgainst = listOfUssrPremiums
                 }
 
-                var premiumCounter = 0
-                // if the ship is premium then add this ship to that entrylist
-                if (listOfPremiumsToCheckAgainst.contains(finalData[i].shipName)){
-                    premiumEntries.add(premiumCounter, newEntry)
-                    //println("${finalData[i].shipName} is a premium")
-                    premiumCounter += 1
-                }
-                var alternateTechLineCounter = 0
 
-                //if the ship is russian alternate or japan alternate
-                if(finalData[0].playerShipJsonClassData.nation == "japan" && listOfJapanAlternateLineShips.contains(finalData[i].shipName) || finalData[0].playerShipJsonClassData.nation == "ussr" && listOfUssrAlternateLineShips.contains(finalData[i].shipName)){
-                    alternateTechLineEntries.add(alternateTechLineCounter, newEntry)
+
+                if (listOfPremiumsToCheckAgainst.contains(finalData[i].shipName)){
+                    premiumEntryList.add(premiumCounter, newEntry)
+                    premiumCounter +=1
+                }
+
+                else if (listOfJapanAlternateLineShips.contains(finalData[i].shipName) || listOfUssrAlternateLineShips.contains(finalData[i].shipName)){
+                    alternateTechLineEntryList.add(alternateTechLineCounter, newEntry)
                     alternateTechLineCounter += 1
                 }
 
-                //if not then its technline and can be added as normal
-                else
-                {
-                    techLineOneEntries.add(i, newEntry)
-                    //println("${finalData[i].shipName} is NOT a premium")
+                else {
+                    techLineEntryList.add(regularTechLineCounter, newEntry)
+                    regularTechLineCounter += 1
                 }
+
 
                 //super Unicum winrate = purple
                 if(finalData2[i].playerShipJsonClassData.winRate.toFloat() in 65.1..100.0){
@@ -193,23 +191,22 @@ class GraphShow : AppCompatActivity(), OnChartValueSelectedListener,
         }
 
         //calculate the total win Percentage
-        var testWinrate : BigDecimal  = finalData?.let { calculateTotalWinrate(it) }!!
+        val testWinrate : BigDecimal  = finalData?.let { calculateTotalWinrate(it) }!!
         Text_WinRateText.text = "${testWinrate} %"
-
         TemporaryTextColorSettingFunction(testWinrate)
         Text_FixedWinRateText.setTextColor(Color.WHITE)
 
-        //Turn a bunch of entries called PremiumTechLineEntries into a LineDataSet1
-        // These are the premiums
-        var premiumDataSet = LineDataSet(
-            premiumEntries, "Winrate of premium ships from: ${
+
+        //Turn a list of entries called premiumEntries into a premiumDataSet
+        val premiumDataSet = LineDataSet(
+            premiumEntryList, "Winrate of premium ships from: ${
                 finalData?.get(
                     0
                 )?.playerShipJsonClassData?.nation
             }"
         )
 
-        //ineDataSet1 parameters
+        //premiumDataSet parameters
         premiumDataSet.color = Color.YELLOW
         premiumDataSet.lineWidth = 3.0F
         premiumDataSet.setCircleColor(Color.YELLOW)
@@ -218,13 +215,13 @@ class GraphShow : AppCompatActivity(), OnChartValueSelectedListener,
         premiumDataSet.circleRadius = 5.0F
         premiumDataSet.valueTextSize = 12.0F
 
-        //Turn a bunch of entries called techLineOneEntries into a LineDataSet2
-        var techLineDataSet = LineDataSet(
-            techLineOneEntries,
+        //Turn a list of entries called techLineOneEntries into a techLineDataSet
+        val techLineDataSet = LineDataSet(
+            techLineEntryList,
             "Winrate of ships from: ${finalData?.get(0)?.playerShipJsonClassData?.nation}"
         )
 
-        //ineDataSet2 parameters
+        //techLineDataSet parameters
         techLineDataSet.color = Color.WHITE
         techLineDataSet.lineWidth = 3.0F
         techLineDataSet.circleHoleRadius = 3.0F
@@ -237,71 +234,65 @@ class GraphShow : AppCompatActivity(), OnChartValueSelectedListener,
         techLineDataSet.highLightColor = Color.RED
         techLineDataSet.highlightLineWidth = 2.0F
 
-        var alternateTechLineDataSet = LineDataSet(
-            alternateTechLineEntries,
+        //Turn a list of entries called alternateTechLineOneEntries into a alternateTechLineDataSet
+        val alternateTechLineDataSet = LineDataSet(
+            alternateTechLineEntryList,
             "Winrate of ships from: ${finalData?.get(0)?.playerShipJsonClassData?.nation}"
         )
 
-        val listWithTechLineAndPremium = mutableListOf<LineDataSet>()
-        listWithTechLineAndPremium.add(techLineDataSet)
-        listWithTechLineAndPremium.add(premiumDataSet)
+        //alternateTechLineDataSet parameters
+        alternateTechLineDataSet.color = Color.BLUE
+        alternateTechLineDataSet.lineWidth = 3.0F
+        alternateTechLineDataSet.circleHoleRadius = 3.0F
+        alternateTechLineDataSet.circleColors = colors
+        alternateTechLineDataSet.circleRadius = 5.0F
+        alternateTechLineDataSet.valueTextSize = 12.0F
 
-        val listWithTechLineAndAlternate = mutableListOf<LineDataSet>()
-        listWithTechLineAndAlternate.add(techLineDataSet)
-        listWithTechLineAndAlternate.add(alternateTechLineDataSet)
+        val testLineDataSetWithPremiumAndTechline = mutableListOf(premiumDataSet, techLineDataSet)
+        val testLineDataSetWithTechlineAndAlternate = mutableListOf(techLineDataSet, alternateTechLineDataSet)
+        val testLineDataSetWithTechlineAndAlternateAndPremium = mutableListOf(techLineDataSet, premiumDataSet, alternateTechLineDataSet)
 
-        val listWithTechlineAndAlternateAndPremium = mutableListOf<LineDataSet>()
-        listWithTechlineAndAlternateAndPremium.add(techLineDataSet)
-        listWithTechlineAndAlternateAndPremium.add(alternateTechLineDataSet)
-        listWithTechlineAndAlternateAndPremium.add(premiumDataSet)
+        println("premiums ${premiumEntryList.size}, alternates ${alternateTechLineEntryList.size}, techline ${techLineEntryList.size}" )
 
+       //TODO Testcase of techline and premium ships European ships : 565421233 ---------------------------------PASSED---------------------------------------
+       if (premiumEntryList.size > 0 && alternateTechLineEntryList.size == 0 && techLineEntryList.size > 0 ){
+           val data = LineData(testLineDataSetWithPremiumAndTechline as List<ILineDataSet>?)
+           chart.data = data
 
+           println("theres ARE premiums,  and there ARE techlines")
+       }
+       //TODO testcase of techline and alternate ships playername: mar_pos USSR ships: 534657455 ---------------------------------PASSED---------------------------------------
+       if (premiumEntryList.size == 0 && alternateTechLineEntryList.size > 0 && techLineEntryList.size > 0 ){
+           val data = LineData(testLineDataSetWithTechlineAndAlternate as List<ILineDataSet>?)
+           chart.data = data
 
-        //TODO Testcase European ships : 565421233
-        //premiums and techline
-        if (techLineOneEntries.size > 0  && alternateTechLineEntries.size == 0 && premiumEntries.size > 0){
-            val data = LineData(listWithTechLineAndPremium as List<ILineDataSet>?)
-            chart.data = data
-            println("there's premiums")
-        }
-            //TODO testcase Japanese ships :557331936
-        // techline and alternate
-        else if ( techLineOneEntries.size > 0 && alternateTechLineEntries.size > 0 && premiumEntries.size == 0){
-            val data = LineData(listWithTechLineAndAlternate as List<ILineDataSet>?)
-            chart.data = data
-            println("there's alternate lines")
-        }
+           println("theres no premiums, there ARE alternates and there ARE techlines")
+       }
+       //TODO testcase of only premium ships Italian ships : 550614274 ---------------------------------PASSED---------------------------------------
+       if(premiumEntryList.size > 0 && alternateTechLineEntryList.size == 0 && techLineEntryList.size == 0 ){
+           val data = LineData(premiumDataSet)
+           chart.data = data
 
-            //TODO testcase Italian ships : 550614274
-        // OnlyPremiums
-        else if ( techLineOneEntries.size == 0 && alternateTechLineEntries.size == 0 && premiumEntries.size > 0){
-            val data = LineData(premiumDataSet)
-            chart.data = data
-            println("theres only techtree and alternate lines")
-        }
+           println("theres only premiums")
+       }
+       //TODO testcase of techline, alternate AND premiums: 557331936 ---------------------------------PASSED---------------------------------------
+       if(premiumEntryList.size > 0 && alternateTechLineEntryList.size > 0 && techLineEntryList.size > 0 ){
+           val data = LineData(testLineDataSetWithTechlineAndAlternateAndPremium as List<ILineDataSet>?)
+           chart.data = data
 
-            //TODO testcase Japanese ships : 526280093 and : 505295462
-        //premiums, techline and alternate
-        else if (premiumEntries.size > 0 && alternateTechLineEntries.size > 0 && techLineOneEntries.size > 0){
-            val data = LineData(listWithTechlineAndAlternateAndPremium as List<ILineDataSet>?)
-            chart.data = data
-            println("theres premiums, techline AND alternate techlines")
-        }
+           println("theres EVERYTHING")
+       }
+       //TODO testcase of only techline ships USA ship : 565421233 ---------------------------------PASSED---------------------------------------
+       if(premiumEntryList.size == 0 && alternateTechLineEntryList.size == 0 && techLineEntryList.size > 0 ){
+           val data = LineData(techLineDataSet)
+           chart.data = data
 
-            //Todo testcase  USA ship : 565421233
-
-            //Todo TESTCASE PASSES
-        //only techline
-        else{
-            val lineDataSet = LineData(techLineDataSet)
-            chart.data = lineDataSet
-            println("theres only techline ships")
-        }
+           println("theres ONLY techline")
+       }
 
         chart.setOnChartValueSelectedListener(this)
 
         chart.invalidate() // Updates the chart
-
     }
 
     //TODO implement a better solution this is practically double code
